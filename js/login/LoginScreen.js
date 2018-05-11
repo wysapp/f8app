@@ -27,6 +27,7 @@ import React from 'react';
 import { connect } from "react-redux";
 import { Animated, Dimensions, Image, StatusBar, View, TouchableOpacity, StyleSheet } from "react-native";
 
+import LoginButton from '../common/LoginButton';
 import F8Colors from '../common/F8Colors';
 import { Text, Heading1 } from '../common/F8Text';
 import F8Fonts from '../common/F8Fonts';
@@ -90,6 +91,14 @@ class LoginScreen extends React.Component {
             <Text style={styles.loginComment}>
               Use Facebook to find your frients at F8.
             </Text>
+
+            <LoginButton source="First screen" />
+            <TouchableOpacity
+              onPress={_ => this.props.dispatch(skipLogin())}
+              style={styles.skipButton}
+            >
+              <Text style={styles.skipText}>SKIP FOR NOW</Text>
+            </TouchableOpacity>
           </Animated.View>
         </View>
       </View>
@@ -183,6 +192,19 @@ const styles = StyleSheet.create({
     color: F8Colors.pink,
     fontFamily: F8Fonts.fontWithWeight('helvetica', 'semibold'),
     marginBottom: 23
+  },
+
+  skipButton: {
+    marginTop: SKIP_BTN_MARGIN_TOP,
+    height: SKIP_BTN_HEIGHT,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  skipText: {
+    color: F8Colors.colorWithAlpha("tangaroa", 0.5),
+    fontFamily: F8Fonts.helvetica
   }
 
 });

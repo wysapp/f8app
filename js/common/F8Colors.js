@@ -97,6 +97,13 @@ const LOCATION_COLORS = {
 
 module.exports = {
   ...THEME_COLORS,
+
+  colorWithAlpha(name: string = 'blue', opacity: number = 1) {
+    if (!THEME_COLORS[name]) {
+      name = 'blue';
+    }
+    return THEME_COLORS[name].split(", 1)").join(`, ${opacity})`);
+  }
 };
 
 

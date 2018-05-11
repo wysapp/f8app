@@ -63,7 +63,7 @@ class F8Button extends React.Component {
   render() {
     const { icon, fontSize, opacity } = this.props;
     const caption = this.props.caption && this.props.caption.toUpperCase();
-    const { buttonTheme, iconTheme, captonTheme } = this.getTheme();
+    const { buttonTheme, iconTheme, captionTheme } = this.getTheme();
     const { containerType, buttonType, iconType, captionType } = this.getType();
 
     let iconImage;
