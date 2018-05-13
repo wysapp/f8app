@@ -24,65 +24,42 @@
 
 "use strict";
 
-import type { Action } from '../actions/types';
+import Parse from "parse/react-native";
+import { Platform, InteractionManager, ActionSheetIOS, Alert, Share } from "react-native";
+import { currentInstallation, updateInstallation } from "./installation";
+import type { ThunkAction, PromiseAction, Dispatch } from "./types";
 
-export type State = {
-  isLoggedIn: boolean,
-  hasSkippedLogin: boolean,
-  sharedSchedule: ?boolean,
-  id: ?string,
-  name: ?string
-};
 
-const initialState = {
-  isLoggedIn: false,
-  hasSkippedLogin: false,
-  sharedSchedule: null,
-  id: null,
-  name: null
-};
+const Agenda = Parse.Object.extend("Agenda");
 
-function user(state: State = initialState, action: Action): State {
 
-  if (action.type === 'LOGGED_IN') {
-    
-    let { id, name, sharedSchedule } = action.data;
-    if (sharedSchedule === undefined) {
-      sharedSchedule = null;
-    }
+async function restoreSchedule(): PromiseAction {
+  const list = await Parse.User
+    .current()
+    .relation("mySchedule")
+    .query()
+    .find();
+  const channels = list.map(({id}) => `session_${id}`);
 
-    return {
-      isLoggedIn: true,
-      hasSkippedLogin: false,
-      sharedSchedule,
-      id,
-      name
-    };
-  }
+  updateInstallation({channels});
 
-  if (action.type === 'SKIPPED_LOGIN') {
-    return {
-      ...initialState,
-      hasSkippedLogin: true
-    };
-  }
-
-  if (action.type === 'LOGGED_OUT') {
-    return initialState;
-  }
-
-  if (action.type === 'SET_SHARING') {
-    return {
-      ...state,
-      sharedSchedule: action.enabled
-    };
-  }
-
-  if (action.type === 'RESET_NUXES') {
-    return { ...state, sharedSchedule: null };
-  }
-
-  return state;  
+  return {
+    type: "RESTORED_SCHEDULE",
+    list
+  };
 }
 
-module.exports = user;
+async function loadFriendsSchedules(): PromiseAction {
+  const list = await Parse.Cloud.run("friends");
+  await InteractionManager.runAfterInteractions();
+
+  return {
+    type: "LOADED_FRIENDS_SCHEDULES",
+    list
+  };
+}
+
+module.exports = {
+  restoreSchedule,
+  loadFriendsSchedules,
+};
