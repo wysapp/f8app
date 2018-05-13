@@ -9,7 +9,6 @@
     "test": "jest --verbose",
     "lint": "eslint .",
     "prettier": "prettier --write '**/*.js'",
-    "prepush": "./scripts/pre-push-checks.sh",
     "graphql": "babel-node ./scripts/generate-graphql-schema.js",
     "relay": "relay-compiler --src ./js --schema ./server/graphql/src/schema/__generated__/schema.graphql"
   },
