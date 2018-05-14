@@ -19,40 +19,26 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE
  */
-
 "use strict";
 
-import { applyMiddleware, createStore } from "redux";
-import { AsyncStorage } from "react-native";
-import thunk from 'redux-thunk';
-import promise from './promise';
-import array from './array';
-import analytics from './analytics';
-import createLogger from 'redux-logger';
-import { persistStore, autoRehydrate } from "redux-persist";
-import reducers from '../reducers';
-import { ensureCompatibility } from './compatibility';
+import React from 'react';
+import { View, StatusBar } from "react-native";
+import { Navigator } from 'react-native-deprecated-custom-components';
+import { connect } from 'react-redux';
 
-const isDebuggingInChrome = true;
+class MyScheduleView extends React.Component {
 
-const logger = createLogger({
-  predicate: (getState, action) => isDebuggingInChrome,
-  collapsed: true,
-  duration: true,
-});
-
-const createF8Store = applyMiddleware(thunk, promise, array, analytics, logger)(createStore);
-
-async function configureStore(onComplete: ?() => void) {
-  const didReset = await ensureCompatibility();
-  const store = autoRehydrate()(createF8Store)(reducers);
-  persistStore(store, { storage: AsyncStorage }, _ => onComplete(didReset));
-
-  if (isDebuggingInChrome) {
-    window.store = store;
+  render() {
+    
+    
+    return null;
   }
-
-  return store;
 }
 
-module.exports = configureStore;
+function select(store) {
+  return {
+    user: store.user,
+  };
+}
+
+module.exports = connect(select)(MyScheduleView);

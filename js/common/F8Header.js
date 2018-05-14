@@ -22,37 +22,24 @@
 
 "use strict";
 
-import { applyMiddleware, createStore } from "redux";
-import { AsyncStorage } from "react-native";
-import thunk from 'redux-thunk';
-import promise from './promise';
-import array from './array';
-import analytics from './analytics';
-import createLogger from 'redux-logger';
-import { persistStore, autoRehydrate } from "redux-persist";
-import reducers from '../reducers';
-import { ensureCompatibility } from './compatibility';
+import React from "react";
+import { Dimensions, View, Image, ToolbarAndroid, Platform, TouchableOpacity, Alert } from "react-native";
 
-const isDebuggingInChrome = true;
+import { Text, HeaderTitle } from "./F8Text";
+import F8Colors from './F8Colors';
+import F8Fonts from './F8Fonts';
+import StyleSheet from './F8StyleSheet';
 
-const logger = createLogger({
-  predicate: (getState, action) => isDebuggingInChrome,
-  collapsed: true,
-  duration: true,
-});
 
-const createF8Store = applyMiddleware(thunk, promise, array, analytics, logger)(createStore);
+export type Layout = 
+  | "default"
+  | "icon"
+  | "title";
 
-async function configureStore(onComplete: ?() => void) {
-  const didReset = await ensureCompatibility();
-  const store = autoRehydrate()(createF8Store)(reducers);
-  persistStore(store, { storage: AsyncStorage }, _ => onComplete(didReset));
+export type Item = {
+  title?: string,
+  icon?: number,
+  layout?: Layout,
+  onPress?: () => void
+};
 
-  if (isDebuggingInChrome) {
-    window.store = store;
-  }
-
-  return store;
-}
-
-module.exports = configureStore;

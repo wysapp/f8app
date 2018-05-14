@@ -28,7 +28,13 @@ import { combineReducers } from "redux";
 
 module.exports = combineReducers({
   config: require('./config'),
-
+  sessions: require('./sessions'),
   user: require('./user'),
+  scheduleTopics: require('./scheduleTopics'),
+  scheduleFilter: require('./scheduleFilter'),
+
+  navigation: require('./navigation'),
+
+  testEventDates: require('./testEventDates')
   
 });

@@ -18,41 +18,37 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE
+ *
+ * @flow
  */
 
 "use strict";
 
-import { applyMiddleware, createStore } from "redux";
-import { AsyncStorage } from "react-native";
-import thunk from 'redux-thunk';
-import promise from './promise';
-import array from './array';
-import analytics from './analytics';
-import createLogger from 'redux-logger';
-import { persistStore, autoRehydrate } from "redux-persist";
-import reducers from '../reducers';
-import { ensureCompatibility } from './compatibility';
+import Parse from 'parse/react-native';
+import { logError, InteractionManager } from 'react-native';
 
-const isDebuggingInChrome = true;
+import type { ThunkAction } from './types';
 
-const logger = createLogger({
-  predicate: (getState, action) => isDebuggingInChrome,
-  collapsed: true,
-  duration: true,
-});
-
-const createF8Store = applyMiddleware(thunk, promise, array, analytics, logger)(createStore);
-
-async function configureStore(onComplete: ?() => void) {
-  const didReset = await ensureCompatibility();
-  const store = autoRehydrate()(createF8Store)(reducers);
-  persistStore(store, { storage: AsyncStorage }, _ => onComplete(didReset));
-
-  if (isDebuggingInChrome) {
-    window.store = store;
-  }
-
-  return store;
+function loadParseQuery(type: string, query: Parse.Query): ThunkAction {
+  return dispatch => {
+    return query.find({
+      success: list => {
+        InteractionManager.runAfterInteractions(() => {
+          dispatch(({type, list}: any));
+        });
+      },
+      error: logError
+    });
+  };
 }
 
-module.exports = configureStore;
+function loadSessions(): ThunkAction {
+  return loadParseQuery(
+    "LOADED_SESSIONS",
+    new Parse.Query("Agenda").include("speakers").ascending("startTime")
+  );
+}
+
+export {
+  loadSessions,
+}

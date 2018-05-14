@@ -27,10 +27,29 @@
 import React from 'react';
 import { AppState, StyleSheet, StatusBar, View } from "react-native";
 import { connect } from "react-redux";
+import F8Navigator from './F8Navigator';
 import LoginScreen from './login/LoginScreen';
 import { version } from './env';
+import { loadSessions } from "./actions";
 
 class F8App extends React.Component {
+
+  componentDidMount() {
+    AppState.addEventListener("change", this.handleAppStateChange);
+
+    this.props.dispatch(loadSessions());
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener("change", this.handleAppStateChange);
+  }
+
+  handleAppStateChange = appState => {
+    console.log('yyyyyyyyyyyyyyyyyyyyyyyyyyyyy----F8App---appState', appState);
+    if (appState === 'active') {
+      this.props.dispatch(loadSessions());
+    }
+  };
 
   render() {
     if (!this.props.skipWelcomeScreen) {
@@ -45,6 +64,7 @@ class F8App extends React.Component {
           backgroundColor="rgba(0, 0, 0, 0)"
           barStyle="light-content"
         />
+        <F8Navigator />
       </View>
     )
   }

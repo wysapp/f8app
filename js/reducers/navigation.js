@@ -18,41 +18,39 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE
+ *
+ * @flow
  */
 
 "use strict";
 
-import { applyMiddleware, createStore } from "redux";
-import { AsyncStorage } from "react-native";
-import thunk from 'redux-thunk';
-import promise from './promise';
-import array from './array';
-import analytics from './analytics';
-import createLogger from 'redux-logger';
-import { persistStore, autoRehydrate } from "redux-persist";
-import reducers from '../reducers';
-import { ensureCompatibility } from './compatibility';
+import type { Action } from '../actions/types';
 
-const isDebuggingInChrome = true;
+export type Tab = "schedule" | "my-schedule" | "map" | "notifications" | "info";
 
-const logger = createLogger({
-  predicate: (getState, action) => isDebuggingInChrome,
-  collapsed: true,
-  duration: true,
-});
+export type Day = 1 | 2;
 
-const createF8Store = applyMiddleware(thunk, promise, array, analytics, logger)(createStore);
+type State = {
+  tab: Tab,
+  day: Day
+};
 
-async function configureStore(onComplete: ?() => void) {
-  const didReset = await ensureCompatibility();
-  const store = autoRehydrate()(createF8Store)(reducers);
-  persistStore(store, { storage: AsyncStorage }, _ => onComplete(didReset));
+const initialState: State = { tab: "schedule", day: 1};
 
-  if (isDebuggingInChrome) {
-    window.store = store;
+function navigation(state: State = initialState, action: Action): State {
+  if (action.type === 'SWITCH_TAB') {
+    return { ...state, tab: action.tab };
   }
 
-  return store;
+  if (action.type === 'SWITCH_DAY') {
+    return { ...state, day: action.day};
+  }
+
+  if (action.type === 'LOGGED_OUT') {
+    return initialState;
+  }
+
+  return state;
 }
 
-module.exports = configureStore;
+module.exports = navigation;

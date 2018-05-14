@@ -24,8 +24,15 @@
 
 "use strict";
 
+import * as parseActions from './parse';
+import * as navigationActions from './navigation';
 import * as loginActions from './login';
+import * as configActions from './config';
 
-module.exports = {
+module.exports = {  
   ...loginActions,
+
+  ...configActions,
+  ...parseActions,
+  ...navigationActions,
 };

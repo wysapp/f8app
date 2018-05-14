@@ -22,37 +22,9 @@
 
 "use strict";
 
-import { applyMiddleware, createStore } from "redux";
-import { AsyncStorage } from "react-native";
-import thunk from 'redux-thunk';
-import promise from './promise';
-import array from './array';
-import analytics from './analytics';
-import createLogger from 'redux-logger';
-import { persistStore, autoRehydrate } from "redux-persist";
-import reducers from '../reducers';
-import { ensureCompatibility } from './compatibility';
+import track from "./track";
 
-const isDebuggingInChrome = true;
-
-const logger = createLogger({
-  predicate: (getState, action) => isDebuggingInChrome,
-  collapsed: true,
-  duration: true,
-});
-
-const createF8Store = applyMiddleware(thunk, promise, array, analytics, logger)(createStore);
-
-async function configureStore(onComplete: ?() => void) {
-  const didReset = await ensureCompatibility();
-  const store = autoRehydrate()(createF8Store)(reducers);
-  persistStore(store, { storage: AsyncStorage }, _ => onComplete(didReset));
-
-  if (isDebuggingInChrome) {
-    window.store = store;
-  }
-
-  return store;
+module.exports = store => next => action => {
+  track(action);
+  return next(action);
 }
-
-module.exports = configureStore;

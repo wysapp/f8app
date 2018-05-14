@@ -18,41 +18,32 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE
+ *
+ * @flow
  */
-
 "use strict";
 
-import { applyMiddleware, createStore } from "redux";
-import { AsyncStorage } from "react-native";
-import thunk from 'redux-thunk';
-import promise from './promise';
-import array from './array';
-import analytics from './analytics';
-import createLogger from 'redux-logger';
-import { persistStore, autoRehydrate } from "redux-persist";
-import reducers from '../reducers';
-import { ensureCompatibility } from './compatibility';
+import type { Session } from '../../reducers/sessions';
 
-const isDebuggingInChrome = true;
+type StringMap = {[key: string]: boolean};
 
-const logger = createLogger({
-  predicate: (getState, action) => isDebuggingInChrome,
-  collapsed: true,
-  duration: true,
-});
-
-const createF8Store = applyMiddleware(thunk, promise, array, analytics, logger)(createStore);
-
-async function configureStore(onComplete: ?() => void) {
-  const didReset = await ensureCompatibility();
-  const store = autoRehydrate()(createF8Store)(reducers);
-  persistStore(store, { storage: AsyncStorage }, _ => onComplete(didReset));
-
-  if (isDebuggingInChrome) {
-    window.store = store;
+function byTopics(sessions: Array<Session>, topics: StringMap): Array<Session> {
+  
+  if (Object.keys(topics).length === 0) {
+    return sessions;
   }
 
-  return store;
+  return sessions.filter(session => {
+    let hasMatchingTag = false;
+    session.tags.forEach(tag => {
+      hasMatchingTag = hasMatchingTag || topics[tag];
+    });
+    return hasMatchingTag;
+  });
 }
 
-module.exports = configureStore;
+function byCompleted(sessions: Array<Session>, time: number): Array<Session> {
+  return sessions.filter(session => session.endTime > time);
+}
+
+module.exports = {byTopics, byCompleted};

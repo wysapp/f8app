@@ -18,41 +18,28 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE
+ *
+ * @flow
  */
 
 "use strict";
 
-import { applyMiddleware, createStore } from "redux";
-import { AsyncStorage } from "react-native";
-import thunk from 'redux-thunk';
-import promise from './promise';
-import array from './array';
-import analytics from './analytics';
-import createLogger from 'redux-logger';
-import { persistStore, autoRehydrate } from "redux-persist";
-import reducers from '../reducers';
-import { ensureCompatibility } from './compatibility';
+type State = Array<string>;
+type Action = { type: string, list: Array<any>};
 
-const isDebuggingInChrome = true;
+function topics(state: State = [], action: Action): State {
+  if (action.type === 'LOADED_SESSIONS') {
+    const topicMap = Object.create(null);
+    action.list.forEach(session => {
+      const tags = session.get("tags") || [];
+      tags.forEach( tag => {
+        topicMap[tag] = true;
+      });
+    });
 
-const logger = createLogger({
-  predicate: (getState, action) => isDebuggingInChrome,
-  collapsed: true,
-  duration: true,
-});
-
-const createF8Store = applyMiddleware(thunk, promise, array, analytics, logger)(createStore);
-
-async function configureStore(onComplete: ?() => void) {
-  const didReset = await ensureCompatibility();
-  const store = autoRehydrate()(createF8Store)(reducers);
-  persistStore(store, { storage: AsyncStorage }, _ => onComplete(didReset));
-
-  if (isDebuggingInChrome) {
-    window.store = store;
+    return Object.keys(topicMap).sort();
   }
-
-  return store;
+  return state;
 }
 
-module.exports = configureStore;
+module.exports = topics;
