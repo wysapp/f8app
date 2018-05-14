@@ -18,38 +18,22 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE
- *
- * @flow
  */
-
 "use strict";
 
-import Parse from 'parse/react-native';
-import { logError, InteractionManager } from 'react-native';
+import React from 'react';
+import { ListView, Platform } from "react-native";
 
-import type { ThunkAction } from './types';
+type Rows = Array<Object>;
+type RowsAndSections = {
+  [sectionID: string]: Object
+};
 
-function loadParseQuery(type: string, query: Parse.Query): ThunkAction {
-  return dispatch => {
-    const qr = query.find({
-      success: list => {
-        InteractionManager.runAfterInteractions(() => {
-          dispatch(({type, list}: any));
-        });
-      },
-      error: logError
-    });
-    return qr;
-  };
+class PureListView extends React.Component {
+  
+  render() {
+    return null;
+  }
 }
 
-function loadSessions(): ThunkAction {
-  return loadParseQuery(
-    "LOADED_SESSIONS",
-    new Parse.Query("Agenda").include("speakers").ascending("startTime")
-  );
-}
-
-export {
-  loadSessions,
-}
+module.exports = PureListView;

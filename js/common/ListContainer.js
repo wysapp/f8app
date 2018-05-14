@@ -24,7 +24,10 @@
 import React from 'react';
 import {findNodeHandle, Animated, NativeModules, View} from 'react-native';
 
+import F8SegmentedControl from './F8SegmentedControl';
+
 import F8Colors from './F8Colors';
+import StyleSheet from './F8StyleSheet';
 import type { Item as HeaderItem } from './F8Header';
 
 type Props = {
@@ -62,6 +65,68 @@ class ListContainer extends React.Component {
     openDrawer: React.PropTypes.func,
     hasUnreadNotifications: React.PropTypes.number
   };
+
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      idx: this.props.selectedSegment || 0,
+      stickyHeaderHeight: 0
+    };
+  }
+
+  render() {
+    const segments = [];
+    const content = React.Children.map(this.props.children, (child, idx) => {
+      segments.push({
+        title: child.props.title,
+        hasUpdates: child.props.hasUpdates
+      });
+
+      return React.cloneElement(child, {
+        ref: ref => {
+          this._refs[idx] = ref;
+        },
+        style: styles.listView,
+        showsVerticalScrollIndicator: false,
+        scrollEventThrottle: 16,
+        automaticallyAdjustContentInsets: false,
+        scrollsToTop: idx === this.state.idx
+      });
+    });
+
+    let { stickyHeader } = this.props;
+    if (segments.length > 1) {
+      stickyHeader = (
+        <View>
+          <F8SegmentedControl
+            values={segments}
+            selectedIndex={this.state.idx}
+            onChange={this.handleSelectSegment}
+            backgroundColor={this.props.headerBackgroundColor}
+            textColor={this.props.segmentedTextColor}
+            borderColor={this.props.segmentedBorderColor}
+          />
+          {stickyHeader}
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.container}>
+        <View style={styles.headerWrapper}>
+          {stickyHeader}
+        </View>
+      </View>
+    );
+  }
+
+  handleSelectSegment = (idx: number) => {
+    if (this.state.idx !== idx) {
+      const { onSegmentChange } = this.props;
+      this.setState({idx}, () => onSegmentChange && onSegmentChange(idx));
+    }
+  }
 }
 
 const styles = StyleSheet.create({

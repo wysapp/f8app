@@ -28,6 +28,9 @@ import { Navigator } from "react-native-deprecated-custom-components";
 import { connect } from "react-redux";
 import { createSelector } from "reselect";
 
+import ListContainer from '../../common/ListContainer';
+import ScheduleListView from './ScheduleListView';
+
 import FilterSessions from './filterSessions';
 import { sessionsHappeningToday } from "../../common/convertTimes";
 
@@ -67,13 +70,27 @@ class GeneralScheduleView extends React.Component {
 
   render() {
 
-    let sessons = [...this.props.sessions];
+    let sessions = [...this.props.sessions];
     if (this.state.hideCompleted && this.state.sessionsHappeningToday) {
       sessions = [...this.state.incompleteSessions];
     }
 
     const content = (
-      <View><Text>sssssssssssssssssssssssssssss</Text></View>
+      <ListContainer
+        title="Schedule"
+        selectedSegment={this.props.day - 1}
+      >
+        <ScheduleListView
+          title="Day 1"
+          day={1}
+          sessions={sessions}
+        />
+        <ScheduleListView
+          title="Day 2"
+          day={2}
+          sessions={sessions}
+        />
+      </ListContainer>
     );
 
     if (Platform.OS === 'ios') {

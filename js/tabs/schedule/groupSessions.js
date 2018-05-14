@@ -18,38 +18,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE
- *
- * @flow
  */
-
 "use strict";
 
-import Parse from 'parse/react-native';
-import { logError, InteractionManager } from 'react-native';
+import type { Session } from "../../reducers/sessions";
 
-import type { ThunkAction } from './types';
-
-function loadParseQuery(type: string, query: Parse.Query): ThunkAction {
-  return dispatch => {
-    const qr = query.find({
-      success: list => {
-        InteractionManager.runAfterInteractions(() => {
-          dispatch(({type, list}: any));
-        });
-      },
-      error: logError
-    });
-    return qr;
-  };
-}
-
-function loadSessions(): ThunkAction {
-  return loadParseQuery(
-    "LOADED_SESSIONS",
-    new Parse.Query("Agenda").include("speakers").ascending("startTime")
-  );
-}
-
-export {
-  loadSessions,
-}
+export type SessionsListData = {
+  [time: string]: {
+    [sessionID: string]: Session
+  }
+};
