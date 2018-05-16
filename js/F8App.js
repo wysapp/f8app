@@ -30,7 +30,7 @@ import { connect } from "react-redux";
 import F8Navigator from './F8Navigator';
 import LoginScreen from './login/LoginScreen';
 import { version } from './env';
-import { loadSessions } from "./actions";
+import { loadSessions, loadMaps } from "./actions";
 
 class F8App extends React.Component {
 
@@ -38,6 +38,7 @@ class F8App extends React.Component {
     AppState.addEventListener("change", this.handleAppStateChange);
 
     this.props.dispatch(loadSessions());
+    this.props.dispatch(loadMaps());
   }
 
   componentWillUnmount() {

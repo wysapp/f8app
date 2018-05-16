@@ -23,8 +23,10 @@
 
 import React from 'react';
 import {findNodeHandle, Animated, NativeModules, View} from 'react-native';
-
+import F8Header from './F8Header';
 import F8SegmentedControl from './F8SegmentedControl';
+import ViewPager from "./ViewPager";
+import ActionsOverlay from "./ActionsOverlay";
 
 import F8Colors from './F8Colors';
 import StyleSheet from './F8StyleSheet';
@@ -73,6 +75,7 @@ class ListContainer extends React.Component {
       idx: this.props.selectedSegment || 0,
       stickyHeaderHeight: 0
     };
+    this._refs = [];
   }
 
   render() {
@@ -82,15 +85,17 @@ class ListContainer extends React.Component {
         title: child.props.title,
         hasUpdates: child.props.hasUpdates
       });
-
       return React.cloneElement(child, {
         ref: ref => {
           this._refs[idx] = ref;
         },
+        // onScroll: (e) => this.handleScroll(idx, e),
         style: styles.listView,
         showsVerticalScrollIndicator: false,
         scrollEventThrottle: 16,
+        // contentInset: {bottom: 141, top: 0},
         automaticallyAdjustContentInsets: false,
+        // renderHeader: this.renderFakeHeader,
         scrollsToTop: idx === this.state.idx
       });
     });
@@ -112,11 +117,37 @@ class ListContainer extends React.Component {
       );
     }
 
+    let modalClose;
+    if (this.props.modalClose) {
+      modalClose = <ActionsOverlay onPress={this.props.modalClose} />;
+    }
+
     return (
       <View style={styles.container}>
         <View style={styles.headerWrapper}>
+          <F8Header
+            title={this.props.title}
+            type={this.props.headerType}
+            navItem={this.props.navItem}
+            leftItem={this.props.leftItem}
+            rightItem={this.props.rightItem}
+            extraItems={this.props.extraItems}
+            backgroundColor={this.props.headerBackgroundColor}
+            titleColor={this.props.headerTitleColor}
+            itemsColor={this.props.headerItemsColor}
+          >
+            {this.props.headerContent}
+          </F8Header>
           {stickyHeader}
         </View>
+        <ViewPager
+          count={segments.length}
+          selectedIndex={this.state.idx}
+          onSelectedIndexChange={this.handleSelectSegment}
+        >
+          {content}
+        </ViewPager>
+        {modalClose}
       </View>
     );
   }
@@ -136,17 +167,18 @@ const styles = StyleSheet.create({
   },
   headerWrapper: {
     android: {
-      backgroundColor: 'transparent',
+      // elevation: 2,
+      backgroundColor: "transparent",
+      // FIXME: elevation doesn't seem to work without setting border
       borderRightWidth: 1,
       marginRight: -1,
-      borderRightColor: 'transparent',
+      borderRightColor: "transparent"
     }
   },
-
   listView: {
     flex: 1,
-    backgroundColor: 'transparent'
-  },
+    backgroundColor: "transparent"
+  }
 });
 
 module.exports = ListContainer;

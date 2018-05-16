@@ -21,22 +21,39 @@
  *
  * @flow
  */
-
 "use strict";
 
-import { combineReducers } from "redux";
+import React from "react";
+import { PixelRatio, StyleSheet, View } from "react-native";
 
-module.exports = combineReducers({
-  config: require('./config'),
-  maps: require("./maps"),
-  
-  sessions: require('./sessions'),
-  user: require('./user'),
-  scheduleTopics: require('./scheduleTopics'),
-  scheduleFilter: require('./scheduleFilter'),
+class ItemsWithSeparator extends React.Component {
+  props: {
+    style?: any,
+    separatorStyle?: any,
+    children?: any
+  };
 
-  navigation: require('./navigation'),
+  render() {
+    const children = [];
+    const length = React.Children.count(this.props.children);
+    React.Children.forEach(this.props.children, (child, ii) => {
+      children.push(child);
+      if (ii !== length - 1) {
+        children.push(
+          <View key={"separator-" + ii} style={[styles.separator, this.props.separatorStyle]} />
+        );
+      }
+    });
 
-  testEventDates: require('./testEventDates')
-  
+    return <View style={this.props.style}>{children}</View>;
+  }
+}
+
+const styles = StyleSheet.create({
+  separator: {
+    backgroundColor: "#0322500A",
+    height: 1 /  PixelRatio.get()
+  }
 });
+
+module.exports = ItemsWithSeparator;

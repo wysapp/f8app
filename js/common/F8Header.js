@@ -75,7 +75,7 @@ class F8HeaderAndroid extends React.Component {
     itemsColor: F8Colors.white
   };
 
-  constructor(){
+  constructor() {
     super();
 
     this.limitActionSelection = false;
@@ -100,7 +100,6 @@ class F8HeaderAndroid extends React.Component {
         show: "always"
       });
     }
-
     if (rightItem) {
       const { title, icon, layout } = rightItem;
       actions.push({
@@ -108,9 +107,7 @@ class F8HeaderAndroid extends React.Component {
         title: title,
         show: "always"
       });
-
     }
-
     if (extraItems) {
       actions = actions.concat(
         extraItems.map(item => ({
@@ -123,14 +120,14 @@ class F8HeaderAndroid extends React.Component {
     let content;
     if (React.Children.count(this.props.children) > 0) {
       content = (
-        <View collapsable={false} style={{ flex: 1}}>
+        <View collapsable={false} style={{ flex: 1 }}>
           {this.props.children}
         </View>
       );
     } else {
       content = (
-        <View collapsable={false} style={{flex: 1, justifyContent: "center"}}>
-          <HeaderTitle numberOfLines={1} style={{color: titleColor}}>
+        <View collapsable={false} style={{ flex: 1, justifyContent: "center" }}>
+          <HeaderTitle numberOfLines={1} style={{ color: titleColor }}>
             {this.props.title}
           </HeaderTitle>
         </View>
@@ -138,7 +135,7 @@ class F8HeaderAndroid extends React.Component {
     }
 
     return (
-      <View style={[styles.header, {backgroundColor}, this.props.style]}>
+      <View style={[styles.header, { backgroundColor }, this.props.style]}>
         <ToolbarAndroid
           navIcon={navItem && navItem.icon}
           onIconClicked={navItem && navItem.onPress}
@@ -146,14 +143,36 @@ class F8HeaderAndroid extends React.Component {
           titleColor={titleColor}
           subtitleColor={titleColor}
           actions={actions}
-          
+          onActionSelected={this.handleActionSelected.bind(this)}
           style={styles.toolbar}
         >
           {content}
         </ToolbarAndroid>
-        <Text style={{height: 0, opacity: 0}}>{actions.length || 0 }</Text>
+        <Text style={{ height: 0, opacity: 0 }}>{actions.length || 0}</Text>
       </View>
     );
+  }
+
+  handleActionSelected(position: number) {
+    if (this.limitActionSelection) {
+      return;
+    }
+
+    let items = this.props.extraItems || [];
+    if (this.props.rightItem) {
+      items = [this.props.rightItem, ...items];
+    }
+    if (this.props.leftItem) {
+      items = [this.props.leftItem, ...items];
+    }
+
+    const item = items[position];
+    item && item.onPress && item.onPress();
+    
+    this.limitActionSelection = true;
+    setTimeout(() => {
+      this.limitActionSelection = false;
+    }, 1000);
   }
 }
 
@@ -169,8 +188,68 @@ class F8HeaderIOS extends React.Component {
   };
 
   render() {
+
+    const {
+      navItem,
+      leftItem,
+      rightItem,
+      title,
+      backgroundColor,
+      titleColor,
+      itemsColor
+    } = this.props;
+
+    let left;
+    if (navItem) {
+      if (navItem.back) {
+        navItem.icon = require("./img/header/back.png");
+      }
+    }
     
+    return null;
   }
 }
 
+const styles = StyleSheet.create({
+  toolbar: {
+    android: {
+      height: HEADER_HEIGHT - STATUS_BAR_HEIGHT
+    }
+  },
+  header: {
+    android: {
+      paddingTop: STATUS_BAR_HEIGHT,
+    },
+    ios: {
+      backgroundColor: 'transparent',
+      paddingTop: STATUS_BAR_HEIGHT,
+      height: HEADER_HEIGHT,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  },
+  titleTextDivider: {
+    android: {
+      position: 'absolute',
+      height: 1,
+      bottom: 0,
+      backgroundColor: F8Colors.accent
+    }
+  },
+  leftItem: {
+    flex: 1,
+    alignItems: "flex-start",
+  }
+});
+
+const Header = Platform.OS === 'ios' ? F8HeaderIOS : F8HeaderAndroid;
+Header.height = HEADER_HEIGHT;
+
+Header.__cards__ = define => {
+
+  define("Simple", () => <Header title="Hello, world" type="underline" />);
+};
+
+module.exports = Header;
 

@@ -24,22 +24,30 @@
 
 "use strict";
 
-import Parse from 'parse/react-native';
-import { logError, InteractionManager } from 'react-native';
+import Parse from "parse/react-native";
+import { logError, InteractionManager } from "react-native";
 
-import type { ThunkAction } from './types';
+import type { ThunkAction } from "./types";
+
+const Maps = Parse.Object.extend("Maps");
+const Notification = Parse.Object.extend("Notification");
+const FAQ = Parse.Object.extend("FAQ");
+const Page = Parse.Object.extend("Page");
+const Video = Parse.Object.extend("Video");
+const Policy = Parse.Object.extend("Policy");
 
 function loadParseQuery(type: string, query: Parse.Query): ThunkAction {
   return dispatch => {
-    const qr = query.find({
+    return query.find({
       success: list => {
+        // We don't want data loading to interfere with smooth animations
         InteractionManager.runAfterInteractions(() => {
-          dispatch(({type, list}: any));
+          // Flow can't guarantee {type, list} is a valid action
+          dispatch(({ type, list }: any));
         });
       },
       error: logError
     });
-    return qr;
   };
 }
 
@@ -50,6 +58,48 @@ function loadSessions(): ThunkAction {
   );
 }
 
+function loadMaps(): ThunkAction {
+  return loadParseQuery("LOADED_MAPS", new Parse.Query(Maps));
+}
+
+function loadNotifications(): ThunkAction {
+  return loadParseQuery("LOADED_NOTIFICATIONS", new Parse.Query(Notification));
+}
+
+function loadFAQs(): ThunkAction {
+  return loadParseQuery(
+    "LOADED_FAQS",
+    new Parse.Query(FAQ).ascending("updatedAt")
+  );
+}
+
+function loadPages(): ThunkAction {
+  return loadParseQuery(
+    "LOADED_PAGES",
+    new Parse.Query(Page).ascending("title")
+  );
+}
+
+function loadVideos(): ThunkAction {
+  return loadParseQuery(
+    "LOADED_VIDEOS",
+    new Parse.Query(Video).descending("updatedAt")
+  );
+}
+
+function loadPolicies(): ThunkAction {
+  return loadParseQuery(
+    "LOADED_POLICIES",
+    new Parse.Query(Policy).ascending("title")
+  );
+}
+
 export {
   loadSessions,
-}
+  loadMaps,
+  loadNotifications,
+  loadFAQs,
+  loadPages,
+  loadVideos,
+  loadPolicies
+};

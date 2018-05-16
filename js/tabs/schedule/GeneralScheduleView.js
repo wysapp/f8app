@@ -27,9 +27,10 @@ import { Dimensions, Platform, View, Text } from "react-native";
 import { Navigator } from "react-native-deprecated-custom-components";
 import { connect } from "react-redux";
 import { createSelector } from "reselect";
-
+import { switchDay } from "../../actions";
 import ListContainer from '../../common/ListContainer';
 import ScheduleListView from './ScheduleListView';
+import FilterScreen from "../../filter/FilterScreen";
 
 import FilterSessions from './filterSessions';
 import { sessionsHappeningToday } from "../../common/convertTimes";
@@ -79,6 +80,31 @@ class GeneralScheduleView extends React.Component {
       <ListContainer
         title="Schedule"
         selectedSegment={this.props.day - 1}
+        onSegmentChange={this.switchDay}
+        navItem={{
+          icon: require("../../common/img/header/back.png"),
+        }}
+        leftItem={{
+          title: "Map",
+          layout: "icon",
+          icon: require("../../common/img/header/map.png"),
+          onPress: _ =>
+            this.props.navigator && this.props.navigator.push({ maps: true })
+        }}
+        rightItem={{
+          icon: require("../../common/img/header/filter.png"),
+          title: "Filter",
+          onPress: this.openFilterScreen
+        }}
+        extraItems={[
+          {
+            icon: require("../../common/img/header/settings.png"),
+            title: "Settings",
+          }, {
+            icon: require("../../common/img/header/star.png"),
+            title: "Star",
+          }
+        ]}
       >
         <ScheduleListView
           title="Day 1"
@@ -99,10 +125,34 @@ class GeneralScheduleView extends React.Component {
       return (
         <View style={{flex: 1}}>
           {content}
+          <FilterScreen
+            visible={this.state.filterModal}
+            topics={this.props.topics}
+            selectedTopics={this.props.filter}
+            onClose={_ => this.setState({filterModal: false})}
+            onApply={selected => this.props.filterTopics(selected)}
+          />
         </View>
       )
     }
   }
+
+  openFilterScreen = () => {
+    if (Platform.OS === 'ios') {
+      this.props.navigator.push({
+        filter: true,
+        topics: this.props.topics,
+        selectedTopics: this.props.filter,
+        onApply: selected => this.props.filterTopics(selected)
+      });
+    } else {
+      this.setState({filterModal: true});
+    }
+  };
+
+  switchDay = (page: number) => {
+    this.props.switchDay(page + 1);
+  };
 }
 
 function select(store) {
@@ -114,4 +164,10 @@ function select(store) {
   };
 }
 
-module.exports = connect(select)(GeneralScheduleView);
+function actions(dispatch) {
+  return {
+    switchDay: day => dispatch(switchDay(day)),
+  }
+}
+
+module.exports = connect(select, actions)(GeneralScheduleView);

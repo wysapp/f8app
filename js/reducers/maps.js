@@ -24,19 +24,28 @@
 
 "use strict";
 
-import { combineReducers } from "redux";
+import createParseReducer from "./createParseReducer";
 
-module.exports = combineReducers({
-  config: require('./config'),
-  maps: require("./maps"),
-  
-  sessions: require('./sessions'),
-  user: require('./user'),
-  scheduleTopics: require('./scheduleTopics'),
-  scheduleFilter: require('./scheduleFilter'),
+export type Map = {
+  id: string,
+  name: string,
+  x1url: string,
+  x2url: string,
+  x3url: string,
+  width: number,
+  height: number
+};
 
-  navigation: require('./navigation'),
+function fromParseObject(map: Object): Map {
+  return {
+    id: map.id,
+    name: map.get("name"),
+    x1url: map.get("x1") && map.get("x1").url(),
+    x2url: map.get("x2") && map.get("x2").url(),
+    x3url: map.get("x3") && map.get("x3").url(),
+    width: map.get("width"),
+    height: map.get("height")
+  };
+}
 
-  testEventDates: require('./testEventDates')
-  
-});
+module.exports = createParseReducer("LOADED_MAPS", fromParseObject);
